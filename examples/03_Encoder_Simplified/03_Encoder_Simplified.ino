@@ -25,7 +25,7 @@
 #include "SimpleRSLK.h"
 
 /* Diameter of Romi wheels in inches */
-float wheelDiameter = 2.7559055;
+float wheelDiameter = 3.0;
 
 /* Number of encoder (rising) pulses every time the wheel turns completely */
 int cntPerRevolution = 360;
@@ -35,21 +35,7 @@ int inchesToTravel = 6;
 
 int wheelSpeed = 15; // Default raw pwm speed for motor.
 
-/* The distance the wheel turns per revolution is equal to the diameter * PI.
- * The distance the wheel turns per encoder pulse is equal to the above divided
- * by the number of pulses per revolution.
- */
-float distanceTraveled(float wheel_diam, uint16_t cnt_per_rev, uint8_t current_cnt) {
-	float temp = (wheel_diam * PI * current_cnt) / cnt_per_rev;
-	return temp;
-}
 
-
-uint32_t countForDistance(float wheel_diam, uint16_t cnt_per_rev, uint32_t distance) {
-	float temp = (wheel_diam * PI) / cnt_per_rev;
-	temp = distance / temp;
-	return int(temp);
-}
 
 void setup() {
 	Serial.begin(115200);

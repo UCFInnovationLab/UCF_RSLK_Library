@@ -56,4 +56,6 @@ uint8_t getLeftWheelDir();
 ///
 uint8_t getRightWheelDir();
 
+uint32_t distanceToEncoder(float wheel_diam, uint16_t cnt_per_rev, uint32_t distance);
+
 #endif

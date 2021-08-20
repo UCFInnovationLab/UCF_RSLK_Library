@@ -17,12 +17,12 @@
 /**
  * @brief   Represent the left push button on the launchpad
  */
-#define LP_LEFT_BTN  PUSH2
+#define LP_LEFT_BTN  74
 
 /**
  * @brief   Represent the right push button on the launchpad
  */
-#define LP_RIGHT_BTN  PUSH1
+#define LP_RIGHT_BTN  73
 
 /**
  * @brief   Total number of bump switches.
