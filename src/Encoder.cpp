@@ -85,4 +85,10 @@ uint32_t distanceToEncoder(float wheel_diam, uint16_t cnt_per_rev, uint32_t dist
     return int(temp);
 }
 
+uint32_t angleToEncoder(float wheel_diam, uint16_t cnt_per_deg, uint32_t angle) {
+    float temp = (wheel_diam * PI) / cnt_per_deg;
+    temp = angle / temp;
+    return int(temp);
+}
+
 

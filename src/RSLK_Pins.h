@@ -252,6 +252,25 @@
 	 */
 	#define LCD_DC                50  // <- Energia Pin #   Launchpad Pin -> P9.6
 
+
+
+	/* MSP-EXP432P401R 
+	 * Red LED, RGB LED, two push buttons on board 
+	 */
+	#define LP_RED_LED_PIN		78 // <- Energia Pin #   Launchpad Pin -> P1.0
+	#define LP_RGB_LED_RED_PIN	75 // <- Energia Pin #   Launchpad Pin -> P2.0
+	#define LP_RGB_LED_GREEN_PIN	76 // <- Energia Pin #   Launchpad Pin -> P2.1
+	#define LP_RGB_LED_BLUE_PIN	77 // <- Energia Pin #   Launchpad Pin -> P2.2
+	#define LP_S1_PIN		73 // <- Energia Pin #   Launchpad Pin -> P1.1
+	#define LP_S2_PIN		74 // <- Energia Pin #   Launchpad Pin -> P1.4
+
+	/* Blinker LEDs on Chassis Board (https://www.pololu.com/product/3671)
+	 */
+	#define LED_BL_PIN	57 // <- Energia Pin #   Launchpad Pin -> P8.6
+	#define LED_BR_PIN	58 // <- Energia Pin #   Launchpad Pin -> P8.7
+	#define LED_FL_PIN	51 // <- Energia Pin #   Launchpad Pin -> P8.0
+	#define LED_FR_PIN	41 // <- Energia Pin #   Launchpad Pin -> P8.5
+
 #endif
 
 #endif
