@@ -23,23 +23,32 @@
 */
 
 #include <Bump_Switch.h>
-#include <GP2Y0A21_Sensor.h>
 #include <DFRobot_BMI160.h>
 #include <Romi_Motor_Power.h>
 #include <Encoder.h>
-#include <QTRSensors.h>
 #include <SimpleRSLK.h>
 #include <RSLK_Pins.h>
+#include <filters.h>
 
-
+unsigned long startTime;
 int16_t accel[6] = {0}; // temp holder for accel(x,y,z);
-int16_t accelArray[500][3]={0};
-unsigned long accelTime[500] = {0};
-unsigned long mainStartTime = 0;
-int accelLength = 0;
+float accelArray[350][3]={0};
+unsigned long accelTime[350] = {0};
+int ticks[350] = {0};
+int currentLength = 0;
 DFRobot_BMI160 bmi160;
 const int8_t i2c_addr = 0x69;
 
+const float cutoff_freq   = 20.0;  //Cutoff frequency in Hz
+const float sampling_time = 0.005; //Sampling time in seconds.
+IIR::ORDER  order  = IIR::ORDER::OD3; // Order (OD1 to OD4)
+
+// Low-pass filter
+Filter f(cutoff_freq, sampling_time, order);
+
+/*
+ * Setup
+ */
 void setup(){
   Serial.begin(115200);
   delay(100);
@@ -64,70 +73,44 @@ void setup(){
   }
 }
 
-
-//
-// ramp()
-//
-// Ramp motors from 'initialSpeed' to 'targetSpeed' for 'duration seconds'
-// Speeds are given from 0-100
-//
-void ramp(float duration, float initialSpeed, float targetSpeed) {
-  unsigned long currentTime = millis();
-  unsigned long sampleTime = currentTime;
-  unsigned long startTime = currentTime;
-  unsigned long stopTime = currentTime + (duration * 1000);
-  float rampAccel = (targetSpeed - initialSpeed)/duration;
-  float ramp = 0;
-  
-  /* Cause the robot to drive forward */
-  setMotorDirection(BOTH_MOTORS,MOTOR_DIR_FORWARD);
-  
-  /* "Turn on" the motor */
-  enableMotor(BOTH_MOTORS);
-
-  while (currentTime < stopTime) {
-    if (currentTime > sampleTime + 50) {
-      sampleAccel();
-      sampleTime = currentTime;
-    }
-    
-    ramp = initialSpeed + rampAccel * ((currentTime - startTime)/1000.0);
-    setMotorSpeed(BOTH_MOTORS,(int)ramp);
-    currentTime = millis();
-    delay(2);
-  }
-}
-
-//
-// sampleAccel()
-//
-void sampleAccel() {
+/*
+ * sampleAccel
+ */
+float sampleAccel() {
   int rslt;
+  float x,y,z;
   rslt = bmi160.getAccelGyroData(accel);
   if (rslt==0) {
-    accelArray[accelLength][0] = accel[3];
-    accelArray[accelLength][1] = accel[4];
-    accelArray[accelLength][2] = accel[5];
-    accelTime[accelLength] = millis() - mainStartTime;
-    accelLength++;
+    x = (float)accel[3] / 16384.0;
+    accelArray[currentLength][0] = x;
+    //y = f.filterIn((float)accel[4] / 16384.0);
+    y = (float)accel[4] / 16384.0;
+    accelArray[currentLength][1] = y;
+    z = (float)accel[5] / 16384.0;
+    accelArray[currentLength][2] = z;
+    accelTime[currentLength] = millis() - startTime;
   } else{
     Serial.println("err");
   }
+  return(y);
 }
 
-//
-// printData()
-//
-void printData(int16_t ag[][3], unsigned long agTime[], int16_t agLength){
+/*
+ * printData
+ */
+void printData(float ag[][3], unsigned long agTime[], int16_t agLength){
   int i, j;
   int sample;
-  
+
+  Serial.println("Time, X, Y, Z");
   for(i=0; i<agLength; i++){
+    Serial.print(ticks[i]);
+    Serial.print(", ");
     Serial.print(agTime[i]);
     Serial.print(", ");
     for(j=0;j<3;j++){
       //the following three data are accel datas
-      Serial.print(ag[i][j]/16384.0);
+      Serial.print(ag[i][j]);
       
       if(j < 3){
         Serial.print(", ");
@@ -135,16 +118,15 @@ void printData(int16_t ag[][3], unsigned long agTime[], int16_t agLength){
     }
     Serial.println();
   }
+
+  Serial.print("Samples: ");
+  Serial.println(agLength);
 }
   
-//
-// loop()
-//
+/*
+ * Loop
+ */
 void loop(){
-  unsigned long currentTime = millis();
-  unsigned long sampleTime = currentTime;
-  unsigned long startTime = currentTime;
-  unsigned long stopTime = startTime + 8000; 
   int i = 0;
   uint16_t totalCount = 0; // Total amount of encoder pulses received
   
@@ -154,31 +136,27 @@ void loop(){
   waitBtnPressed(LP_LEFT_BTN,btnMsg,RED_LED);
   delay(1000);
   
-  /* Cause the robot to drive forward */
+  /* Enable robot to drive forward */
   setMotorDirection(BOTH_MOTORS,MOTOR_DIR_FORWARD);
-  
-  /* "Turn on" the motor */
   enableMotor(BOTH_MOTORS);
 
   /* Set the encoder pulses count to zero */
   resetLeftEncoderCnt();
   resetRightEncoderCnt();
   
-  mainStartTime = millis(); /* save the start time */
-  
   setMotorSpeed(BOTH_MOTORS,30);
+  
+  float currentAccel;
+  #define STOP_VALUE -4.0
+
   bool done=false;
-  float lastAccel;
-  while ((currentTime < stopTime) && (!done)) {
-    if (currentTime > sampleTime + 50) {
-      sampleAccel();
-      sampleTime = currentTime;
-      // Stop the robot deceleration < VALUE
-      lastAccel = accelArray[accelLength-1][1]; // last y
-      if (lastAccel < -2.0) done=true;
-    }
-    
-    currentTime = millis();
+  int cnt=0;
+  startTime = millis();
+  while ((cnt < 300) && (!done)) {
+    currentAccel = sampleAccel();
+    ticks[currentLength] = getEncoderLeftCnt();
+    currentLength++;
+    cnt++;
     delay(2);
   }
     
@@ -192,6 +170,6 @@ void loop(){
   setupWaitBtn(LP_RIGHT_BTN);
   btnMsg = "\nPush right button on Launchpad to print data.\n";
   waitBtnPressed(LP_RIGHT_BTN,btnMsg,RED_LED);
-  printData(accelArray, accelTime, accelLength);
+  printData(accelArray, accelTime, currentLength);
   while(1);
 } // end loop
