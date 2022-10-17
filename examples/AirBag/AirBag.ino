@@ -28,7 +28,6 @@
 #include <Encoder.h>
 #include <SimpleRSLK.h>
 #include <RSLK_Pins.h>
-#include <filters.h>
 
 unsigned long startTime;
 int16_t accel[6] = {0}; // temp holder for accel(x,y,z);
@@ -38,13 +37,6 @@ int ticks[350] = {0};
 int currentLength = 0;
 DFRobot_BMI160 bmi160;
 const int8_t i2c_addr = 0x69;
-
-const float cutoff_freq   = 20.0;  //Cutoff frequency in Hz
-const float sampling_time = 0.005; //Sampling time in seconds.
-IIR::ORDER  order  = IIR::ORDER::OD3; // Order (OD1 to OD4)
-
-// Low-pass filter
-Filter f(cutoff_freq, sampling_time, order);
 
 /*
  * Setup
@@ -76,14 +68,13 @@ void setup(){
 /*
  * sampleAccel
  */
-float sampleAccel() {
+float *sampleAccel() {
   int rslt;
   float x,y,z;
   rslt = bmi160.getAccelGyroData(accel);
   if (rslt==0) {
-    x = (float)accel[3] / 16384.0;
+    x = (float)accel[3] / 16384.0;  
     accelArray[currentLength][0] = x;
-    //y = f.filterIn((float)accel[4] / 16384.0);
     y = (float)accel[4] / 16384.0;
     accelArray[currentLength][1] = y;
     z = (float)accel[5] / 16384.0;
@@ -92,7 +83,7 @@ float sampleAccel() {
   } else{
     Serial.println("err");
   }
-  return(y);
+  return(accelArray[currentLength]);
 }
 
 /*
@@ -102,7 +93,7 @@ void printData(float ag[][3], unsigned long agTime[], int16_t agLength){
   int i, j;
   int sample;
 
-  Serial.println("Time, X, Y, Z");
+  Serial.println("Ticks, Time, X, Y, Z");
   for(i=0; i<agLength; i++){
     Serial.print(ticks[i]);
     Serial.print(", ");
@@ -146,17 +137,20 @@ void loop(){
   
   setMotorSpeed(BOTH_MOTORS,30);
   
-  float currentAccel;
-  #define STOP_VALUE -4.0
+  float *currentAccel;
 
   bool done=false;
   int cnt=0;
   startTime = millis();
   while ((cnt < 300) && (!done)) {
     currentAccel = sampleAccel();
+    float x_accel = currentAccel[0];
+    float y_accel = currentAccel[1];
+    float z_accel = currentAccel[2];
     ticks[currentLength] = getEncoderLeftCnt();
     currentLength++;
     cnt++;
+    if (fabs(x_accel) > 1) done=true;
     delay(2);
   }
     
