@@ -30,7 +30,7 @@ THE SOFTWARE.
 ===============================================
 */
 
-#include<arduino.h>
+#include<Energia.h>
 #include<Wire.h>
 #include<SPI.h>
 

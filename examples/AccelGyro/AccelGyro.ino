@@ -1,5 +1,5 @@
  /*!
-  * accelGyro.ino
+  * AccelGyro.ino
   *
   * I2C addr:
   *   0x68: connect SDIO pin of the BMI160 to GND which means the default I2C address
@@ -26,6 +26,7 @@ const int8_t i2c_addr = 0x69;
 void setup(){
   Serial.begin(115200);
   delay(100);
+  Wire.begin();
   
   //init the hardware bmin160  
   if (bmi160.softReset() != BMI160_OK){
@@ -75,13 +76,3 @@ void loop(){
    * bmi160.getGyroData(onlyGyro);
    */
 }
-
-
-
-
-
-
-
-
-
-

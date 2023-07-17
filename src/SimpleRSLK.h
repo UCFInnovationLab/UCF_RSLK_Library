@@ -1,6 +1,6 @@
 /** @file */
 #include "RSLK_Pins.h"
-#include "QTRSensorsUCF.h"
+#include "QTRSensors.h"
 #include "GP2Y0A21_Sensor.h"
 #include "Encoder.h"
 #include "Romi_Motor_Power.h"
@@ -12,8 +12,7 @@
 /**
  * @brief   Total number of sensors on QTR line sensor.
  */
-//#define LS_NUM_SENSORS   8     // number of sensors used
-#define LS_NUM_SENSORS   1     // number of sensors used
+#define LS_NUM_SENSORS   8     // number of sensors used
 
 /**
  * @brief   Represent the left push button on the launchpad
@@ -179,7 +178,7 @@ void setMotorSpeed(uint8_t motorNum, uint8_t speed);
 ///
 ///
 /// Read and store sensor values in the passed in array.
-uint16_t readLineSensor();
+void readLineSensor(uint16_t *sensor);
 
 /// \brief Configure pin as a wait to release button
 ///
@@ -206,5 +205,79 @@ void setupLed(uint8_t ledPin);
 /// specified button.
 void waitBtnPressed(uint8_t btnPin,String msg = "",int8_t ledPin = 0);
 
+/// \brief Provide default values for the sensor's Min and Max arrays.
+///
+/// \param[out] sensorMin stores sensor's min values. Must pass an array with 8 elements.
+///  All elements will by default be given a large value.
+///
+/// \param[out] sensorMax stores sensor's max values. Must pass an array with 8 elements.
+///  All elements will by default be given a value of 0.
+///
+///  Initializes arrays to be used to store line sensor's min and max values.
+void clearMinMax(uint16_t *sensorMin,uint16_t *sensorMax);
 
+/// \brief Update line sensor's min and max values array based on current data.
+///
+/// \param[in] sensor is an array filled with line sensor values previously filled by readLineSensor.
+///
+/// \param[out] sensorMin stores sensor's min values.
+///
+/// \param[out] sensorMax stores sensor's max values.
+///
+///  Take the current line sensor values and update min and max values. This function along with the
+///  min and max arrays are useful when performing calibration.
+void setSensorMinMax(uint16_t *sensor,uint16_t *sensorMin,uint16_t *sensorMax);
+
+
+/// \brief Update sensor's min and max values array based on current data.
+///
+/// \param[out] sensor is an array to be filled with line sensor values.
+///
+/// \param[out] calVal is an array that will be filled with the calibrated values based on the sensor,
+/// sensorMin and sensorMax array. @n
+/// Elements will be filled with values of 0 - 1000
+/// - 0 means no line detected
+/// - ...
+/// - 1000 means line is detected right under sensor.
+///
+/// \param[in] sensorMin stores sensor's min values.
+///
+/// \param[in] sensorMax stores sensor's max values.
+///
+/// \param[in] mode determines if the line is dark or light.
+/// - 0 is used when the line is darker than the floor
+/// - 1 is used when the line is lighter than the floor.
+///
+/// Takes the current line sensor values and sets calVal to the calibrated values. Uses
+/// sensorMin and sensorMax array along with mode to calibrate value. @n @n
+///
+/// Calibration:
+/// - When the line is dark then calibration subtracts sensorMax values from the sensor value read.
+/// - When the line is light then calibration subtracts sensorMin values from the sensor value read.
+/// Then the value is subtracted from 1000 to provide a consistent scale.
+void readCalLineSensor(uint16_t* sensor,
+					   uint16_t* calVal,
+					   uint16_t *sensorMin,
+					   uint16_t *sensorMax,
+					   uint8_t mode);
+
+/// \brief Get line position
+/// \param[in] calVal is an array that is filled with the line sensor calibrated values.
+///
+/// \param[in] mode determines if the line is dark or light.
+/// - 0 is used when the line is darker than the floor
+/// - 1 is used when the line is lighter than the floor.
+///
+/// \return value between 0 - 7000.
+///  - 0 no line detected
+///  - ...
+///  - 1000 line is directly on the left most sensor
+///  - ...
+///  - 3500 line directly over two middle sensors.
+///  - ...
+///  - 7000 is under right most line sensor
+///
+///  Using calibrated line sensor value this function provides a numerical value indicating
+///  where the robot is detecting the line. This function can be overridden.
+uint32_t getLinePosition(uint16_t* calVal, uint8_t mode);
 #endif

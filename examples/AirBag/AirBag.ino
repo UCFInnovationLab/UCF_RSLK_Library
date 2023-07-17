@@ -1,5 +1,3 @@
-
-
 /*!
 * accel.ino
 *
@@ -44,6 +42,7 @@ const int8_t i2c_addr = 0x69;
 void setup(){
   Serial.begin(115200);
   delay(100);
+  Wire.begin();
   setupRSLK();
   
   /* Left button on Launchpad */
