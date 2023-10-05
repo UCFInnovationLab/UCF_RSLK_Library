@@ -31,12 +31,6 @@
 // #define BNO055_I2C_ADDR2                0x29
 // #define BNO055_I2C_ADDR                 BNO055_I2C_ADDR2
 
-//Pin assignments as tested on the Arduino Due.
-//Vdd,Vddio : 3.3V
-//GND : GND
-//SDA/SCL : SDA/SCL
-//PSO/PS1 : GND/GND (I2C mode)
-
 //This structure contains the details of the BNO055 device that is connected. (Updated after initialization)
 struct bno055_t myBNO;
 struct bno055_euler myEulerData; //Structure to hold the Euler data
@@ -85,14 +79,15 @@ void setup() {
 	setupWaitBtn(LP_LEFT_BTN);  // Left button on Launchpad
 	setupLed(RED_LED);  // led red
 
-	setMotorDirection(BOTH_MOTORS,MOTOR_DIR_FORWARD);   // direction: forward
-	enableMotor(BOTH_MOTORS);       // enable both motors
-	setMotorSpeed(BOTH_MOTORS,0);   // set motor speed
+  /* Initialize motors */
+	setMotorDirection(BOTH_MOTORS,MOTOR_DIR_FORWARD);
+	enableMotor(BOTH_MOTORS);
+	setMotorSpeed(BOTH_MOTORS,0);
 
+  /* Read initial heading */
   delay(1000);
   bno055_read_euler_hrp(&myEulerData);			//Update Euler data into the structure
   initialHeading = float(myEulerData.h) / 16.00;
-
   Serial.print("Initial Heading(Yaw): ");				//To read out the Heading (Yaw)
   Serial.println(initialHeading);
   
@@ -103,7 +98,7 @@ void loop() {
 
   delay(50);
 
-  if ((millis() - lastTime) >= 1000) //To stream at 10Hz without using additional timers
+  if ((millis() - lastTime) >= 10) //To stream at 10Hz without using additional timers
   {
     Serial.println(curState);
     lastTime = millis();
@@ -125,7 +120,7 @@ void loop() {
     break;
 
     case LEG1:
-      if (driveToDistanceHeading(15,0,15)) {
+      if (driveToDistanceHeading(12,0,15)) {
         curState = TURN1;
       };
     break;
@@ -154,11 +149,18 @@ boolean driveToDistanceHeading(float inches, int desiredHeading, int speed) {
   uint16_t ticks = distanceToEncoder(wheelDiameter, cntPerRevolution, inches);
 
   int headingError = calculateDifferenceBetweenAngles(desiredHeading, getCurrentRealtiveHeadingToStart());
+  Serial.print("Drive: Heading Error");
+  Serial.println(headingError);
   int adjustSpeed = headingError * P;
-  adjustSpeed = constrain(adjustSpeed,-5,5);
+  adjustSpeed = constrain(adjustSpeed,-10,10);
   /* Set motor speed */
+  setMotorDirection(LEFT_MOTOR,MOTOR_DIR_FORWARD);   
+  setMotorDirection(RIGHT_MOTOR,MOTOR_DIR_FORWARD);
 	setMotorSpeed(LEFT_MOTOR,constrain(speed+adjustSpeed,0,100));
   setMotorSpeed(RIGHT_MOTOR,constrain(speed-adjustSpeed,0,100));
+
+  Serial.print("Left motor: "); Serial.print(speed+adjustSpeed);
+  Serial.print(" Right motor: "); Serial.println(speed-adjustSpeed);
 
   int totalCount = (getEncoderLeftCnt() + getEncoderRightCnt()) / 2;
 	if (totalCount > ticks) {
@@ -175,7 +177,13 @@ boolean turnTo(int degrees, int speed) {
   
   int headingError = calculateDifferenceBetweenAngles(degrees, getCurrentRealtiveHeadingToStart());
 
-  Serial.print("Heading(Yaw): ");				//To read out the Heading (Yaw)
+
+  if (abs(headingError) < 2) {
+     setMotorSpeed(BOTH_MOTORS,0);  // Halt motors
+      return true;
+  }
+
+  Serial.print("Turn: Heading Error: ");				//To read out the Heading (Yaw)
   Serial.println(headingError);		
 
   if (headingError >= 0) {
@@ -183,18 +191,10 @@ boolean turnTo(int degrees, int speed) {
       setMotorDirection(LEFT_MOTOR,MOTOR_DIR_FORWARD);   
       setMotorDirection(RIGHT_MOTOR,MOTOR_DIR_BACKWARD);
       setMotorSpeed(BOTH_MOTORS,speed);
-	    if (headingError <= 0) {
-	      setMotorSpeed(BOTH_MOTORS,0);  // Halt motors
-        return true;
-      }
 	} else {
       setMotorDirection(LEFT_MOTOR,MOTOR_DIR_BACKWARD);   
       setMotorDirection(RIGHT_MOTOR,MOTOR_DIR_FORWARD);
       setMotorSpeed(BOTH_MOTORS,speed);
-      	if (headingError >= 0) {
-	        setMotorSpeed(BOTH_MOTORS,0);  // Halt motors
-          return true;
-      }
   }
 
   return false;
