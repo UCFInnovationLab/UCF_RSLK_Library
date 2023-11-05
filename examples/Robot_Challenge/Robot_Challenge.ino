@@ -14,7 +14,8 @@ float initialHeading;
 #define LINE_GOAL 0.0         // Value to track while following line (-1.0 to 1.0
 #define BASE_SPEED 15         // Default speed of the robot
 #define TURN_SPEED 10         // Default turn speed
-#define P 5.0                 // Proportional constant for line following
+#define P_FOLLOW 5.0          // Proportional constant for line following
+#define P_GYRO_DRIVE 5.0      // Proportional constant for gyro heading following
 #define TURN_COUNT 350        // Counts to turn
 #define DESIRED_HEADING 0     // Heading to return on (figure it out)
 
@@ -76,34 +77,7 @@ void setup()
   Serial.print("Initial Heading(Yaw): ");				//To read out the Heading (Yaw)
   Serial.println(initialHeading);
 
-  String btnMsg = "Push Left button on Launchpad to begin line following.\n";
-  btnMsg += "Make sure the robot is on the line.\n";
-  /* Waait until button is pressed to start robot */
-  waitBtnPressed(LP_LEFT_BTN,btnMsg,RED_LED);
-  delay(1000);
-
   enableMotor(BOTH_MOTORS);
-}
-
-boolean crashed()
-{
- return (isBumpSwitchPressed(2) || isBumpSwitchPressed(3));
-}
-
-void follow(float myP, int myBaseSpeed)
-{
-  // read sensor and normalize between between -1.0 and 1.0
-  float sensor = readLineSensor();
-  float sensor_normalized = ((sensor - LOW_LEVEL) / (HIGH_LEVEL - LOW_LEVEL)*2) - 1.0;
-
-  float error = sensor_normalized - LINE_GOAL;
-  int motor_speed_delta = myP * error;
-
-  int left_motor_speed = constrain(myBaseSpeed + motor_speed_delta, 0, 100);
-  int right_motor_speed = constrain(myBaseSpeed - motor_speed_delta, 0, 100);
-
-  setMotorSpeed(LEFT_MOTOR, left_motor_speed);
-  setMotorSpeed(RIGHT_MOTOR, right_motor_speed);
 }
 
 // MAIN LOOP // 
@@ -123,13 +97,13 @@ void loop()
     case START: 
       Serial.println("Start");
 	    /* Wait until button is pressed to start robot */
-	    waitBtnPressed(LP_LEFT_BTN,"\nPush left button on Launchpad to start demo.\n",RED_LED);
+	    waitBtnPressed(LP_LEFT_BTN,"\nPush left button on Launchpad to start challenge.\n",RED_LED);
       state = FOLLOW;
     break;
 
     // Follow the line
     case FOLLOW:
-      follow(P,BASE_SPEED);
+      follow(P_FOLLOW,BASE_SPEED);
       if (crashed()) {
          state = CRASH;
       }
@@ -166,11 +140,11 @@ void loop()
       setMotorDirection(RIGHT_MOTOR,MOTOR_DIR_FORWARD);
       setMotorSpeed(LEFT_MOTOR, BASE_SPEED+20);
       setMotorSpeed(RIGHT_MOTOR,BASE_SPEED+20);
-      state = FOLLOW_HOME;
+      state = STRAIGHT_HOME;
     break;
 
     case GYRO_HOME:
-      if (driveToDistanceHeading(12,0,BASE_SPEED)) {
+      if (driveToDistanceHeading(P_GYRO_DRIVE,12,0,BASE_SPEED)) {
         state = DONE;
       };
     break;
@@ -182,7 +156,7 @@ void loop()
     break;
 
     case FOLLOW_HOME:
-      follow(P+1,BASE_SPEED+5);
+      follow(P_FOLLOW+1,BASE_SPEED+5);
     break;
 
     case DONE:	/* Halt motors */
@@ -197,16 +171,37 @@ void loop()
   } // end state
 }
 
+boolean crashed()
+{
+ return (isBumpSwitchPressed(2) || isBumpSwitchPressed(3));
+}
+
+void follow(float myP, int myBaseSpeed)
+{
+  // read sensor and normalize between between -1.0 and 1.0
+  float sensor = readLineSensor();
+  float sensor_normalized = ((sensor - LOW_LEVEL) / (HIGH_LEVEL - LOW_LEVEL)*2) - 1.0;
+
+  float error = sensor_normalized - LINE_GOAL;
+  int motor_speed_delta = myP * error;
+
+  int left_motor_speed = constrain(myBaseSpeed + motor_speed_delta, 0, 100);
+  int right_motor_speed = constrain(myBaseSpeed - motor_speed_delta, 0, 100);
+
+  setMotorSpeed(LEFT_MOTOR, left_motor_speed);
+  setMotorSpeed(RIGHT_MOTOR, right_motor_speed);
+}
+
 /*
  * Drive distance
  */
-boolean driveToDistanceHeading(float inches, int desiredHeading, int speed) {
+boolean driveToDistanceHeading(float myP, float inches, int desiredHeading, int speed) {
   uint16_t ticks = distanceToEncoder(wheelDiameter, cntPerRevolution, inches);
 
   int headingError = calculateDifferenceBetweenAngles(desiredHeading, getCurrentRealtiveHeadingToStart());
   Serial.print("Drive: Heading Error");
   Serial.println(headingError);
-  int adjustSpeed = headingError * P;
+  int adjustSpeed = headingError * myP;
   adjustSpeed = constrain(adjustSpeed,-10,10);
   /* Set motor speed */
   setMotorDirection(LEFT_MOTOR,MOTOR_DIR_FORWARD);   
