@@ -138,8 +138,9 @@ void loop()
 
     case RESET_TURN:
       setMotorDirection(RIGHT_MOTOR,MOTOR_DIR_FORWARD);
-      setMotorSpeed(LEFT_MOTOR, BASE_SPEED+20);
-      setMotorSpeed(RIGHT_MOTOR,BASE_SPEED+20);
+      // reset encoders
+	    resetLeftEncoderCnt();
+	    resetRightEncoderCnt();
       state = STRAIGHT_HOME;
     break;
 
