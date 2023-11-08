@@ -20,7 +20,7 @@ This [Energia] (https://energia.nu/) library provides a set of classes and funct
 
 6. Add the RSLK robot library that is downloadable at the bottom of this page in the Code section. Go to Sketch > Include Library > add .ZIP library. Select the file path of the downloaded zip library and click okay. It should say library added and you can check this by going to File > Examples > TI-Robot-Lib and see the example code provided in the library.
 
-7. Go to Tools > Manage Libraries.. and serch for and install "BNO055 by Robert Bosch GMBH"
+7. Go to Tools > Manage Libraries.. and search for and install "BNO055 by Robert Bosch GMBH"
 
 # Using This Library
 
