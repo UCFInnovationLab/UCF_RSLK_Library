@@ -18,7 +18,7 @@ This [Energia] (https://energia.nu/) library provides a set of classes and funct
 
 5. You also should select the correct COM port. This step can be done after you plug your LaunchPad to your computer over USB and you install your LaunchPad drivers (done in later step using RSLK debug tool GUI). Go to Tools > COM port to chose from available options. The LaunchPad populates two COM ports. MacOS users will see Port 001 and 004 populated, please use Port 1. Windows users can verify their COM port by going to Device Manager and finding the XDS110 UART.
 
-6. Add the RSLK robot library that is downloadable at the bottom of this page in the Code section. Go to Sketch > Include Library > add .ZIP library. Select the file path of the downloaded zip library and click okay. It should say library added and you can check this by going to File > Examples > TI-Robot-Lib and see the example code provided in the library.
+6. Add the latest release of the RSLK robot library that is downloadable from the releases section of this page. Download the sorces.zip file. Go to Sketch > Include Library > add .ZIP library. Select the file path of the downloaded zip library and click okay. It should say library added and you can check this by going to File > Examples > TI-Robot-Lib and see the example code provided in the library.
 
 7. Go to Tools > Manage Libraries.. and search for and install "BNO055 by Robert Bosch GMBH"
 
