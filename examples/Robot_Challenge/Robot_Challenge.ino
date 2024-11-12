@@ -1,20 +1,24 @@
 #include "SimpleRSLK.h"
-#include "BNO055_support.h"		//Contains the bridge code between the API and Arduino
+//#include "BNO055_support.h"		//Contains the bridge code between the API and Arduino
 #include <Wire.h>
 
-struct bno055_t myBNO;
-struct bno055_euler myEulerData; //Structure to hold the Euler data
+// struct bno055_t myBNO;
+// struct bno055_euler myEulerData; //Structure to hold the Euler data
 
 float wheelDiameter = 2.5;      // Diameter of Romi wheels in inches
 int cntPerRevolution = 360;   // Number of encoder (rising) pulses every time the wheel turns completely
 
 float initialHeading;
-#define HIGH_LEVEL 1800       // BLACK light level
-#define LOW_LEVEL  350        // WHITE light level
-#define LINE_GOAL 0.0         // Value to track while following line (-1.0 to 1.0
-#define BASE_SPEED 15         // Default speed of the robot
+
+uint16_t sensorVal[LS_NUM_SENSORS];
+uint16_t sensorCalVal[LS_NUM_SENSORS];
+uint16_t sensorMaxVal[LS_NUM_SENSORS] = {2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500};
+uint16_t sensorMinVal[LS_NUM_SENSORS] = {805, 1047, 759, 955, 790, 1154, 931, 1245};
+
+#define GOAL 3500       // value of normalized light sensor to follow
+#define BASE_SPEED 10         // Default speed of the robot
 #define TURN_SPEED 10         // Default turn speed
-#define P_FOLLOW 5.0          // Proportional constant for line following
+#define P_FOLLOW 0.01         // Proportional constant for line following
 #define P_GYRO_DRIVE 5.0      // Proportional constant for gyro heading following
 #define TURN_COUNT 350        // Counts to turn
 #define DESIRED_HEADING 0     // Heading to return on (figure it out)
@@ -47,15 +51,16 @@ void setup()
   Wire.begin();
 
   // Initialization of the BNO055
-  BNO_Init(&myBNO); //Assigning the structure to hold information about the device
+  // BNO_Init(&myBNO); //Assigning the structure to hold information about the device
 
   // Configuration to NDoF mode
-  bno055_set_operation_mode(OPERATION_MODE_NDOF);
+  // bno055_set_operation_mode(OPERATION_MODE_NDOF);
 
   delay(1);       // Wait for gyro to settle
   Serial.begin(115200);
 
   setupRSLK();
+  clearMinMax(sensorMinVal,sensorMaxVal);
 
   // reset encoders
 	resetLeftEncoderCnt();
@@ -72,8 +77,8 @@ void setup()
   // Read initial heading
   delay(1000);
   delay(1000);
-  bno055_read_euler_hrp(&myEulerData);			//Update Euler data into the structure
-  initialHeading = float(myEulerData.h) / 16.00;
+//  bno055_read_euler_hrp(&myEulerData);			//Update Euler data into the structure
+//  initialHeading = float(myEulerData.h) / 16.00;
   Serial.print("Initial Heading(Yaw): ");				//To read out the Heading (Yaw)
   Serial.println(initialHeading);
 
@@ -181,15 +186,41 @@ boolean crashed()
 
 void follow(float myP, int myBaseSpeed)
 {
-  // read sensor and normalize between between -1.0 and 1.0
-  float sensor = readLineSensor();
-  float sensor_normalized = ((sensor - LOW_LEVEL) / (HIGH_LEVEL - LOW_LEVEL)*2) - 1.0;
+	/* Valid values are either:
+	 *  DARK_LINE  if your floor is lighter than your line
+	 *  LIGHT_LINE if your floor is darker than your line
+	 */
+	uint8_t lineColor = DARK_LINE;
 
-  float error = sensor_normalized - LINE_GOAL;
+	readLineSensor(sensorVal);
+
+  /*
+   * Take current sensor values and adjust using previous calibration values
+   * Output: sensorCalVal
+   */
+	readCalLineSensor(sensorVal,
+					  sensorCalVal,
+					  sensorMinVal,
+					  sensorMaxVal,
+					  lineColor);
+
+	uint32_t linePos = getLinePosition(sensorCalVal,lineColor);
+
+  /* use PID algorithm to calculate speed delta */
+  int error = linePos - GOAL;
   int motor_speed_delta = myP * error;
+    Serial.print(linePos);
+    Serial.print(", ");
+    Serial.print(error);
+    Serial.print(", ");
+    Serial.print(motor_speed_delta);
+    Serial.println();
 
-  int left_motor_speed = constrain(myBaseSpeed + motor_speed_delta, 0, 100);
-  int right_motor_speed = constrain(myBaseSpeed - motor_speed_delta, 0, 100);
+  /* add and subtract delta from left and right sides.  Cap motors at 100 */
+  int temp = myBaseSpeed + motor_speed_delta;
+  int left_motor_speed = (temp > 100) ? 100 : temp; 
+  temp = myBaseSpeed - motor_speed_delta;
+  int right_motor_speed = (temp < 0) ? 0 : temp; 
 
   setMotorSpeed(LEFT_MOTOR, left_motor_speed);
   setMotorSpeed(RIGHT_MOTOR, right_motor_speed);
@@ -254,8 +285,9 @@ boolean turnTo(int degrees, int speed) {
 }
 
 int getCurrentRealtiveHeadingToStart(){
-  bno055_read_euler_hrp(&myEulerData);			//Update Euler data into the structure
-  float difference = (float(myEulerData.h) / 16.00) - initialHeading;
+  //bno055_read_euler_hrp(&myEulerData);			//Update Euler data into the structure
+  //float difference = (float(myEulerData.h) / 16.00) - initialHeading;
+  float difference = 0.0;
   return ((int)difference + 360) % 360;
 } 
 
