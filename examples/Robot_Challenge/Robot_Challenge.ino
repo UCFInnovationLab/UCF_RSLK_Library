@@ -164,7 +164,7 @@ void loop()
     break;
 
     case FOLLOW_HOME:
-      follow(P_FOLLOW+1,BASE_SPEED+5);
+      follow(P_FOLLOW+.01,BASE_SPEED+10);   // Follow a little faster on the way back
     break;
 
     case DONE:	/* Halt motors */
