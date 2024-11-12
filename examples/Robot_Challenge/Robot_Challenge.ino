@@ -1,9 +1,9 @@
 #include "SimpleRSLK.h"
-//#include "BNO055_support.h"		//Contains the bridge code between the API and Arduino
+#include "BNO055_support.h"		//Contains the bridge code between the API and Arduino
 #include <Wire.h>
 
-// struct bno055_t myBNO;
-// struct bno055_euler myEulerData; //Structure to hold the Euler data
+struct bno055_t myBNO;
+struct bno055_euler myEulerData; //Structure to hold the Euler data
 
 float wheelDiameter = 2.5;      // Diameter of Romi wheels in inches
 int cntPerRevolution = 360;   // Number of encoder (rising) pulses every time the wheel turns completely
@@ -51,10 +51,10 @@ void setup()
   Wire.begin();
 
   // Initialization of the BNO055
-  // BNO_Init(&myBNO); //Assigning the structure to hold information about the device
+  BNO_Init(&myBNO); //Assigning the structure to hold information about the device
 
   // Configuration to NDoF mode
-  // bno055_set_operation_mode(OPERATION_MODE_NDOF);
+  bno055_set_operation_mode(OPERATION_MODE_NDOF);
 
   delay(1);       // Wait for gyro to settle
   Serial.begin(115200);
@@ -77,8 +77,8 @@ void setup()
   // Read initial heading
   delay(1000);
   delay(1000);
-//  bno055_read_euler_hrp(&myEulerData);			//Update Euler data into the structure
-//  initialHeading = float(myEulerData.h) / 16.00;
+  bno055_read_euler_hrp(&myEulerData);			//Update Euler data into the structure
+  initialHeading = float(myEulerData.h) / 16.00;
   Serial.print("Initial Heading(Yaw): ");				//To read out the Heading (Yaw)
   Serial.println(initialHeading);
 
@@ -285,9 +285,8 @@ boolean turnTo(int degrees, int speed) {
 }
 
 int getCurrentRealtiveHeadingToStart(){
-  //bno055_read_euler_hrp(&myEulerData);			//Update Euler data into the structure
-  //float difference = (float(myEulerData.h) / 16.00) - initialHeading;
-  float difference = 0.0;
+  bno055_read_euler_hrp(&myEulerData);			//Update Euler data into the structure
+  float difference = (float(myEulerData.h) / 16.00) - initialHeading;
   return ((int)difference + 360) % 360;
 } 
 
