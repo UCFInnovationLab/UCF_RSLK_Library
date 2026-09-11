@@ -4,15 +4,15 @@
 # Introduction
 
 
-This [Energia] (https://energia.nu/) library provides a set of classes and functions to make using the [Texas Instrument's Robotic System Learning Kit] (http://www.ti.com/rslk) simple. @n Go to http://www.ti.com/rslk to see the user guides, view curriculum and find the link to order.
+This [Energia] (https://energia.nu/) library provides a set of classes and functions to make using the [Texas Instrument's Robotic System Learning Kit] (http://www.ti.com/rslk) simple.
 
 # Installation
 
-1. Download and install the latest version of Arduino IDE (1.8.13). https://www.arduino.cc/en/software/
+1. Download and install the latest version of Arduino IDE. https://www.arduino.cc/en/software/
 
-2. Add the URL http://s3.amazonaws.com/energiaUS/packages/package_energia_index.json to your File > Preferences > Additional Board Manager URLs. Also check the box for show line numbers if you like that and adjust your font size if you would like it bigger.
+2. Add the URL https://raw.githubusercontent.com/Andy4495/TI_Platform_Cores_For_Arduino/main/json/package_energia_optimized_index.json to your File > Preferences > Additional Board Manager URLs. Also check the box for show line numbers if you like that and adjust your font size if you would like it bigger.
 
-3. Go to Tools > Boards > Boards Manager and scroll to the bottom of the list with Energia MSP432 and install 5.29.1
+3. Go to Tools > Boards > Boards Manager and search for Energia MSP432 EMT RED boards and install 5.30.0
 
 4. After the install completes, You need to select the board and COM port in Arduino IDE. Go to Tool > Boards and now you should see the "Energia MSP432 Red Boards" > "Red LaunchPad MSP432P401R EMT" and make sure this is selected.
 
