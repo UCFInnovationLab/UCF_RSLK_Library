@@ -23,6 +23,7 @@
  */
 
 #include "SimpleRSLK.h"
+#include "UCF_RSLK.h"
 
 /* Diameter of Romi wheels in inches */
 float wheelDiameter = 3.0;
@@ -58,7 +59,7 @@ void loop() {
 	/* Wait until button is pressed to start robot */
 	btnMsg += "\nPush left button on Launchpad to start demo.\n";
 	/* Wait until button is pressed to start robot */
-	waitBtnPressed(LP_LEFT_BTN,btnMsg,RED_LED);
+	waitBtnPressedString(LP_LEFT_BTN,btnMsg,RED_LED);
 
 	delay(2000);
 

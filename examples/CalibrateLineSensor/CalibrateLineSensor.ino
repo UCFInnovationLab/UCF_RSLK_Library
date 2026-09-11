@@ -14,6 +14,7 @@
  */
 
 #include "SimpleRSLK.h"
+#include "UCF_RSLK.h"
 
 uint16_t sensorVal[LS_NUM_SENSORS];
 uint16_t sensorCalVal[LS_NUM_SENSORS];
@@ -38,7 +39,7 @@ void floorCalibration() {
 	String btnMsg = "Push left button on Launchpad to begin calibration.\n";
 	btnMsg += "Make sure the robot is on the floor away from the line.\n";
 	/* Wait until button is pressed to start robot */
-	waitBtnPressed(LP_LEFT_BTN,btnMsg,RED_LED);
+	waitBtnPressedString(LP_LEFT_BTN,btnMsg,RED_LED);
 
 	delay(1000);
 

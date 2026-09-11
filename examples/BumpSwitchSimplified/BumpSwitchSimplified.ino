@@ -23,6 +23,7 @@
  */
 
 #include "SimpleRSLK.h"
+#include "UCF_RSLK.h"
 
 int motorSpeed = 10;
 
@@ -40,7 +41,7 @@ void loop() {
 
 	String btnMsg = "Push left button on Launchpad to start demo.\n";
 	/* Wait until button is pressed to start robot */
-	waitBtnPressed(LP_LEFT_BTN,btnMsg,RED_LED);
+	waitBtnPressedString(LP_LEFT_BTN,btnMsg,RED_LED);
 
 	/* Wait two seconds before starting */
 	delay(2000);
