@@ -12,7 +12,7 @@ This [Energia] (https://energia.nu/) library provides a set of classes and funct
 
 2. Add the URL https://raw.githubusercontent.com/Andy4495/TI_Platform_Cores_For_Arduino/main/json/package_energia_optimized_index.json to your File > Preferences > Additional Board Manager URLs. Also check the box for show line numbers if you like that and adjust your font size if you would like it bigger.
 
-3. Go to Tools > Boards > Boards Manager and search for Energia MSP432 EMT RED boards and install 5.30.0
+3. Go to Tools > Boards > Boards Manager and search for "Energia MSP432 EMT RED boards" and install 5.30.0
 
 4. After the install completes, You need to select the board and COM port in Arduino IDE. Go to Tool > Boards and now you should see the "Energia MSP432 Red Boards" > "Red LaunchPad MSP432P401R EMT" and make sure this is selected.
 
