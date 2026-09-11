@@ -6,11 +6,25 @@
 
 This [Energia] (https://energia.nu/) library provides a set of classes and functions to make using the [Texas Instrument's Robotic System Learning Kit] (http://www.ti.com/rslk) simple.
 
-# Installation
+# Arduino IDE 2.x Setup
 
-1. Download and install the latest version of Arduino IDE. https://www.arduino.cc/en/software/
+This project requires additional board package URLs, standard Arduino libraries, and custom ZIP libraries. Follow the steps below to fully configure Arduino IDE 2.x.
 
-2. Add the URL https://raw.githubusercontent.com/Andy4495/TI_Platform_Cores_For_Arduino/main/json/package_energia_optimized_index.json to your File > Preferences > Additional Board Manager URLs. Also check the box for show line numbers if you like that and adjust your font size if you would like it bigger.
+# Step 1 - Download and install the latest version of Arduino IDE. https://www.arduino.cc/en/software/
+
+# Step 2 - Open Arduino IDE Settings
+
+1. Open the **Arduino IDE**.
+2. On **macOS**, click **Arduino IDE** in the top menu bar, then select **Settings**.
+3. On **Windows** or **Linux**, click **File**, then select **Preferences**.
+4. The Arduino IDE settings window will open.
+
+# Step 3 - Add the Additional Boards Manager URLs
+
+1. In the settings window, locate the field labeled **Additional Boards Manager URLs**.
+2. Copy and paste the following URLs into that field, with **one URL per line**:
+
+       https://raw.githubusercontent.com/Andy4495/TI_Platform_Cores_For_Arduino/main/json/package_energia_optimized_index.json
 
 3. Go to Tools > Boards > Boards Manager and search for "Energia MSP432 EMT RED boards" and install 5.30.0
 
