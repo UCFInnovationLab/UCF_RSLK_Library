@@ -44,14 +44,12 @@ This project requires additional board package URLs, standard Arduino libraries,
 
 1. In the Arduino IDE, click **Tools**.
 2. Select **Manage Libraries...**
-3. In the **Library Manager** search box, type **ESP32Servo**.
-4. Locate **ESP32Servo** in the results list.
+3. In the **Library Manager** search box, type **BNO055**.
+4. Locate **BNO055 by Robert Bosch GMBH** in the results list.
 5. Click **Install** and wait for the installation to complete.
-6. In the search box, type **NeoPixelBus**.
-7. Locate **NeoPixelBus by Makuna**.
-8. Click **Install** and wait for the installation to complete.
-9. Confirm that both libraries are installed before continuing.
-### Step 5 - Install Custom Libraries from ZIP Files
+6. Confirm that the library is installed before continuing.
+   
+### Step 6 - Install Custom Libraries from ZIP Files
 
 This project also requires the following custom libraries:
 
