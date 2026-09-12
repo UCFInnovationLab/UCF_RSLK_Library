@@ -70,13 +70,38 @@ For each custom library, complete the following steps:
 
 Using ZIP files from the **Releases** page is recommended because they provide a specific tested version of the library rather than the latest development snapshot from the repository.
 
+### Step 7 - Install the FET110 Debugger Driver (MSP-EXP432P401R only)
 
+If you are using the **MSP-EXP432P401R**, you must install the TI MSP432 FET110 USB debugger driver before the board will be recognized by your computer.
 
-4. After the install completes, You need to select the board and COM port in Arduino IDE. Go to Tool > Boards and now you should see the "Energia MSP432 Red Boards" > "Red LaunchPad MSP432P401R EMT" and make sure this is selected.
+1. Download the driver installer: [ti_emupack_setup_9.2.0.00002_win_64.exe](https://github.com/UCFInnovationLab/GNOR_V4/blob/main/docs/ti_emupack_setup_9.2.0.00002_win_64.exe) (Click the Download raw button!)
+2. Run the installer and follow the on-screen prompts.
+3. Once installation is complete, plug in your MSP-EXP432P401R via USB.
+4. Verify that the board is recognized by your computer before continuing.
 
-5. You also should select the correct COM port. This step can be done after you plug your LaunchPad to your computer over USB and you install your LaunchPad drivers (done in later step using RSLK debug tool GUI). Go to Tools > COM port to chose from available options. The LaunchPad populates two COM ports. MacOS users will see Port 001 and 004 populated, please use Port 1. Windows users can verify their COM port by going to Device Manager and finding the XDS110 UART.
+> **Note:** This driver is only required for the MSP-EXP432P401R. Skip this step if you are using the MSP-EXP430F5529LP or ESP32.
 
-7. Go to Tools > Manage Libraries.. and search for and install "BNO055 by Robert Bosch GMBH"
+### Step 9 - Restart the Arduino IDE and Verify Installation
+
+1. Close the Arduino IDE.
+2. Reopen the Arduino IDE.
+3. Click **Tools → Board** and verify that the newly installed board packages are now available.
+4. Click **Sketch → Include Library** and verify that the installed libraries appear in the library list.
+5. Click **File → Examples** and check whether example sketches are available for the installed libraries.
+6. Select your target board from the **Tools → Board** menu.
+7. Open your project sketch.
+8. Run a compile test to confirm that the required boards and libraries were installed correctly.
+
+### Step 10 - COM ports
+1. After the install completes, You need to select the board and COM port in Arduino IDE. Go to Tool > Boards and now you should see the "Energia MSP432 Red Boards" > "Red LaunchPad MSP432P401R EMT" and make sure this is selected.
+
+2. You also should select the correct COM port. This step can be done after you plug your LaunchPad to your computer over USB and you install your LaunchPad drivers (done in later step using RSLK debug tool GUI). Go to Tools > COM port to chose from available options. The LaunchPad populates two COM ports. MacOS users will see Port 001 and 004 populated, please use Port 1. Windows users can verify their COM port by going to Device Manager and finding the XDS110 UART.
+### Notes
+
+- If the **Additional Boards Manager URLs** field already contains entries, keep them and add these new URLs on separate lines.
+- Do not remove existing URLs unless you are sure they are no longer needed.
+- If you previously installed older versions of the custom ZIP libraries manually, remove the older copies first to avoid duplicate library conflicts.
+- After installation, example sketches may appear under **File → Examples**.
 
 # Using This Library
 
@@ -84,8 +109,6 @@ Using ZIP files from the **Releases** page is recommended because they provide a
 Library documentation is hosted on Github Pages at https://fcooper.github.io/Energia-RSLK-Library/
 
 ## SimpleRSLK (Recommended)
-
-
 The SimpleRSLK.h defines a set of easy to use functions for the RSLK. Internally it calls the classes and functions mentioned below.
 
 ## Peripheral Specific Library/Function
