@@ -1,4 +1,4 @@
-
+![RSLK Robot](docs/rslk.png)
 # Introduction
 
 This [Energia] (https://energia.nu/) library provides a set of classes and functions to make using the [Texas Instrument's Robotic System Learning Kit] (http://www.ti.com/rslk) simple.
