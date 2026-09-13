@@ -1,5 +1,5 @@
 <img width="690" height="534" alt="RSLK" src="https://github.com/user-attachments/assets/9a6c7a66-96b0-44ff-8c40-a9bcd1a32583" />
-![RSLK Robot](docs/RSLK.png)
+
 # Introduction
 
 This [Energia] (https://energia.nu/) library provides a set of classes and functions to make using the [Texas Instrument's Robotic System Learning Kit] (http://www.ti.com/rslk) simple.
