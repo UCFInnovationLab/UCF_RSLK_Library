@@ -46,12 +46,16 @@ This project requires additional board package URLs, standard Arduino libraries,
 4. Locate **BNO055 by Robert Bosch GMBH** in the results list.
 5. Click **Install** and wait for the installation to complete.
 6. Confirm that the library is installed before continuing.
+
+> **Note:** This is only required if you're using the default BNO055 IMU. See the MPU6050 note under Step 6 below for the alternative IMU option used by the `GyroDrive` example.
    
 ### Step 6 - Install Custom Libraries from ZIP Files
 
 This project also requires the following custom libraries:
 
 - [UCF_RSLK_LIBRARY](https://github.com/UCFInnovationLab/UCF_RSLK/releases)
+
+> **MPU6050 alternative:** The `GyroDrive` example can use an MPU6050 IMU instead of the BNO055. To use it, uncomment `#define USE_MPU6050` near the top of `examples/GyroDrive/GyroDrive.ino`, then download and install the [MPU6050 library](https://github.com/ucfinnovationlab/mpu6050/releases) as a custom ZIP library the same way as below, instead of installing BNO055 in Step 5.
 
 For each custom library, complete the following steps:
 
