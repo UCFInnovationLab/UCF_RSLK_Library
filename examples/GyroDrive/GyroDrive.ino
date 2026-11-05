@@ -81,6 +81,8 @@ String btnMsg = " ";
 unsigned long lastTime = 0;
 
 void setup() {
+	Serial.begin(115200);
+
   //Initialize I2C communication
   Wire.begin();
 
@@ -126,7 +128,6 @@ void setup() {
 
   delay(1);
 #endif
-	Serial.begin(115200);
 
 	setupRSLK();
 
