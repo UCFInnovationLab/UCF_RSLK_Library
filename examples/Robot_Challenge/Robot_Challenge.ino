@@ -35,10 +35,11 @@ float initialHeading;
 
 uint16_t sensorVal[LS_NUM_SENSORS];
 uint16_t sensorCalVal[LS_NUM_SENSORS];
+// Replace these with the Max/Min values printed by the CalibrateLineSensor example for your robot
 uint16_t sensorMaxVal[LS_NUM_SENSORS] = {2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500};
 uint16_t sensorMinVal[LS_NUM_SENSORS] = {805, 1047, 759, 955, 790, 1154, 931, 1245};
 
-#define GOAL 3500       // value of normalized light sensor to follow
+#define GOAL 4500       // value of normalized light sensor to follow
 #define BASE_SPEED 10         // Default speed of the robot
 #define TURN_SPEED 10         // Default turn speed
 #define P_FOLLOW 0.01         // Proportional constant for line following
@@ -119,7 +120,6 @@ void setup()
 #endif
 
   setupRSLK();
-  clearMinMax(sensorMinVal,sensorMaxVal);
 
   // reset encoders
 	resetLeftEncoderCnt();
