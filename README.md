@@ -53,7 +53,7 @@ This project requires additional board package URLs, standard Arduino libraries,
 
 This project also requires the following custom libraries:
 
-- [UCF_RSLK_LIBRARY](https://github.com/UCFInnovationLab/UCF_RSLK/releases)
+- [UCF_RSLK_LIBRARY](https://github.com/UCFInnovationLab/UCF_RSLK_Library/releases)
 
 > **MPU6050 alternative:** The `GyroDrive` example can use an MPU6050 IMU instead of the BNO055. To use it, uncomment `#define USE_MPU6050` near the top of `examples/GyroDrive/GyroDrive.ino`, then download and install the [MPU6050 library](https://github.com/ucfinnovationlab/mpu6050/releases) as a custom ZIP library the same way as below, instead of installing BNO055 in Step 5.
 
