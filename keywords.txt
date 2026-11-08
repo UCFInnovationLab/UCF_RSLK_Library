@@ -34,3 +34,18 @@ getAccelGyroData	KEYWORD2
 #######################################
 
 BMI160_OK	LITERAL1
+
+#######################################
+# Servo432
+#######################################
+
+Servo432	KEYWORD1
+attach	KEYWORD2
+detach	KEYWORD2
+write	KEYWORD2
+writeMicroseconds	KEYWORD2
+read	KEYWORD2
+readMicroseconds	KEYWORD2
+attached	KEYWORD2
+setPeriodHertz	KEYWORD2
+SERVO432_INVALID	LITERAL1

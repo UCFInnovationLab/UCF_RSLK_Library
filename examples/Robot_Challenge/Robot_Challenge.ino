@@ -4,6 +4,7 @@
 
 #include "SimpleRSLK.h"
 #include "UCF_RSLK.h"
+#include "Servo432.h"           // Jitter-free Timer_A hardware PWM servo driver for MSP432
 #ifdef USE_MPU6050
   #include "I2Cdev.h"
   #include "MPU6050_6Axis_MotionApps20.h"
@@ -28,7 +29,11 @@
   struct bno055_euler myEulerData; //Structure to hold the Euler data
 #endif
 
-float wheelDiameter = 2.5;      // Diameter of Romi wheels in inches
+// Servo432 supports Energia pins 37 (P5.6), 38 (P2.4), 39 (P2.6) and 40 (P2.7)
+#define SERVO1_PIN 37         // P5.6 / Timer_A2 -- avoids Timer_A0, which the motor PWM may share
+Servo432 servo1;
+
+float wheelDiameter = 2.5;     // Diameter of Romi wheels in inches
 int cntPerRevolution = 360;   // Number of encoder (rising) pulses every time the wheel turns completely
 
 float initialHeading;
@@ -132,6 +137,12 @@ void setup()
 	setMotorDirection(BOTH_MOTORS,MOTOR_DIR_FORWARD);
 	enableMotor(BOTH_MOTORS);
 	setMotorSpeed(BOTH_MOTORS,0);
+
+  /* Initialize servo */
+  if (servo1.attach(SERVO1_PIN) == SERVO432_INVALID) {
+    Serial.println("servo1 attach failed: pin not supported by Servo432");
+  }
+  servo1.write(90);             // Center servo
 
   // Read initial heading
   delay(1000);
