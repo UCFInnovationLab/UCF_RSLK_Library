@@ -2,9 +2,15 @@
 // Install "MPU6050" by UCF Innovation Lab: https://github.com/ucfinnovationlab/mpu6050/releases
 //#define USE_MPU6050
 
+// Comment out to disable the three WS2812 RGB LEDs (requires the WS2812_MSP432 library).
+#define USE_WS2812
+
 #include "SimpleRSLK.h"
 #include "UCF_RSLK.h"
 #include "Servo432.h"           // Jitter-free Timer_A hardware PWM servo driver for MSP432
+#ifdef USE_WS2812
+  #include <WS2812_MSP432.h>    // WS2812 RGB LED driver for MSP432
+#endif
 #ifdef USE_MPU6050
   #include "I2Cdev.h"
   #include "MPU6050_6Axis_MotionApps20.h"
@@ -32,6 +38,11 @@
 // Servo432 supports Energia pins 37 (P5.6), 38 (P2.4), 39 (P2.6) and 40 (P2.7)
 #define SERVO_ESC_PIN 37         // P5.6 / Timer_A2 -- avoids Timer_A0, which the motor PWM may share
 Servo432 servoEsc;
+
+#ifdef USE_WS2812
+  #define WS2812_COUNT 3
+  WS2812_MSP432 _strip(WS2812_COUNT);
+#endif
 
 float wheelDiameter = 2.5;     // Diameter of Romi wheels in inches
 int cntPerRevolution = 360;   // Number of encoder (rising) pulses every time the wheel turns completely
@@ -143,6 +154,19 @@ void setup()
     Serial.println("servoEsc attach failed: pin not supported by Servo432");
   }
   servoEsc.write(90);             // Center servo
+
+#ifdef USE_WS2812
+  /* Initialize WS2812 LEDs */
+  _strip.begin();
+  _strip.clear();
+  delay(1000);    // Delay, 432 need a delay before LED's would work
+
+  // Light some LEDs
+  _strip.setPixelColor(0, 50, 0, 0);
+  _strip.setPixelColor(1, 0, 50, 0);
+  _strip.setPixelColor(2, 0, 0, 50);
+  _strip.show();
+#endif // USE_WS2812
 
   // Read initial heading
   delay(1000);
