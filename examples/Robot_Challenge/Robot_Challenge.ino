@@ -1,6 +1,6 @@
 // Uncomment to use an MPU6050 IMU (via I2Cdevlib DMP) instead of the default BNO055.
 // Install "MPU6050" by UCF Innovation Lab: https://github.com/ucfinnovationlab/mpu6050/releases
-#define USE_MPU6050
+//#define USE_MPU6050
 
 // Comment out to disable the three WS2812 RGB LEDs (requires the WS2812_MSP432 library).
 #ifdef USE_MPU6050
@@ -193,24 +193,22 @@ void loop()
     lastTime = millis();
   }
 
+#ifdef USE_MPU6050
   heading = readHeading();
   // calculate heading turn rate.  this can be used to give a measure of how fast the boat's heading is drifting when the
   // boat is still.  If good, stable rate should be less than .005.
   headingRate = calculateDifferenceBetweenAngles(heading, lastHeading);
   lastHeading = heading;
 
-Serial.print(headingRate);
-Serial.print(", ");
-Serial.println(heading);
-
   // if the heading rate is less than some constant then turn on the Green LED
-#ifdef USE_WS2812
-  if (fabs(headingRate) < .005) {
-      _strip.setPixelColor(2, 0, 10, 0);
-  } else {
-      _strip.setPixelColor(2, 10, 0, 0);
-  }
-  _strip.show();
+  #ifdef USE_WS2812
+    if (fabs(headingRate) < .005) {
+        _strip.setPixelColor(2, 0, 10, 0);
+    } else {
+        _strip.setPixelColor(2, 10, 0, 0);
+    }
+    _strip.show();
+  #endif
 #endif
 
   // Run Current State
