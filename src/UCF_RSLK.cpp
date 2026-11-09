@@ -32,6 +32,10 @@ void waitBtnPressedString(uint8_t btnPin,String msg,int8_t ledPin) {
 	delay(50);
 }
 
+boolean isBtnPressed(uint8_t btnPin) {
+	return (digitalRead(btnPin) == 0);
+}
+
 /* The distance the wheel turns per revolution is equal to the diameter * PI.
  * The distance the wheel turns per encoder pulse is equal to the above divided
  * by the number of pulses per revolution.

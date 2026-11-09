@@ -1,9 +1,11 @@
 // Uncomment to use an MPU6050 IMU (via I2Cdevlib DMP) instead of the default BNO055.
 // Install "MPU6050" by UCF Innovation Lab: https://github.com/ucfinnovationlab/mpu6050/releases
-//#define USE_MPU6050
+#define USE_MPU6050
 
 // Comment out to disable the three WS2812 RGB LEDs (requires the WS2812_MSP432 library).
-#define USE_WS2812
+#ifdef USE_MPU6050
+  #define USE_WS2812
+#endif 
 
 #include "SimpleRSLK.h"
 #include "UCF_RSLK.h"
@@ -48,6 +50,9 @@ float wheelDiameter = 2.5;     // Diameter of Romi wheels in inches
 int cntPerRevolution = 360;   // Number of encoder (rising) pulses every time the wheel turns completely
 
 float initialHeading;
+  float heading;
+  float lastHeading=0.0;
+  float headingRate;
 
 uint16_t sensorVal[LS_NUM_SENSORS];
 uint16_t sensorCalVal[LS_NUM_SENSORS];
@@ -73,6 +78,7 @@ typedef enum State
   START,
   FOLLOW,
   CRASH,
+  DUMP,
   TURN_SIMPLE,
   TURN_GYRO,
   RESET_TURN,
@@ -155,7 +161,7 @@ void setup()
   }
   servoEsc.write(90);             // Center servo
 
-#ifdef USE_WS2812
+#if defined(USE_WS2812) && defined(USE_MPU6050)
   /* Initialize WS2812 LEDs */
   _strip.begin();
   _strip.clear();
@@ -168,13 +174,9 @@ void setup()
   _strip.show();
 #endif // USE_WS2812
 
-  // Read initial heading
+  // Delay to allow heading stabalize
   delay(1000);
   delay(1000);
-  initialHeading = readHeading();
-  Serial.print("Initial Heading(Yaw): ");				//To read out the Heading (Yaw)
-  Serial.println(initialHeading);
-
   enableMotor(BOTH_MOTORS);
 }
 
@@ -186,17 +188,43 @@ void loop()
 
   if ((millis() - lastTime) >= 10) // Print state at 10hz
   {
-    Serial.println(state);
+    // Serial.print("State: ");
+    // Serial.println(state);
     lastTime = millis();
   }
+
+  heading = readHeading();
+  // calculate heading turn rate.  this can be used to give a measure of how fast the boat's heading is drifting when the
+  // boat is still.  If good, stable rate should be less than .005.
+  headingRate = calculateDifferenceBetweenAngles(heading, lastHeading);
+  lastHeading = heading;
+
+Serial.print(headingRate);
+Serial.print(", ");
+Serial.println(heading);
+
+  // if the heading rate is less than some constant then turn on the Green LED
+#ifdef USE_WS2812
+  if (fabs(headingRate) < .005) {
+      _strip.setPixelColor(2, 0, 10, 0);
+  } else {
+      _strip.setPixelColor(2, 10, 0, 0);
+  }
+  _strip.show();
+#endif
 
   // Run Current State
   switch (state) {
     case START: 
       Serial.println("Start");
 	    /* Wait until button is pressed to start robot */
-	    waitBtnPressedString(LP_LEFT_BTN,"\nPush left button on Launchpad to start challenge.\n",RED_LED);
-      state = FOLLOW;
+	    //waitBtnPressedString(LP_LEFT_BTN,"\nPush left button on Launchpad to start challenge.\n",RED_LED);
+      if (isBtnPressed(LP_LEFT_BTN)){
+        state = FOLLOW;
+        initialHeading = readHeading();
+        Serial.print("Initial Heading(Yaw): ");				//To read out the Heading (Yaw)
+        Serial.println(initialHeading);
+      }
     break;
 
     // Follow the line
@@ -211,10 +239,15 @@ void loop()
       setMotorSpeed(LEFT_MOTOR, 0);
       setMotorSpeed(RIGHT_MOTOR, 0);
       crashedCount = getEncoderRightCnt();
-      state = TURN_SIMPLE;
+      state = TURN_GYRO;
+    break;
+
+    case DUMP:
+      servoEsc.write(0);
     break;
 
     case TURN_SIMPLE:
+    servoEsc.write(0);
       setMotorDirection(RIGHT_MOTOR,MOTOR_DIR_BACKWARD);
       setMotorSpeed(LEFT_MOTOR,BASE_SPEED);
       setMotorSpeed(RIGHT_MOTOR,BASE_SPEED);
@@ -227,7 +260,7 @@ void loop()
         state = RESET_TURN;
       }
     break;
-
+ 
     case TURN_GYRO:
       if (turnTo(90,TURN_SPEED)) {
         state = RESET_TURN;
@@ -325,7 +358,7 @@ void follow(float myP, int myBaseSpeed)
 boolean driveToDistanceHeading(float myP, float inches, int desiredHeading, int speed) {
   uint16_t ticks = distanceToEncoder(wheelDiameter, cntPerRevolution, inches);
 
-  int headingError = calculateDifferenceBetweenAngles(desiredHeading, getCurrentRealtiveHeadingToStart());
+  float headingError = calculateDifferenceBetweenAngles(desiredHeading, getCurrentRealtiveHeadingToStart());
   Serial.print("Drive: Heading Error");
   Serial.println(headingError);
   int adjustSpeed = headingError * myP;
@@ -352,10 +385,10 @@ boolean driveToDistanceHeading(float myP, float inches, int desiredHeading, int 
  */
 boolean turnTo(int degrees, int speed) {
   
-  int headingError = calculateDifferenceBetweenAngles(degrees, getCurrentRealtiveHeadingToStart());
+  float headingError = calculateDifferenceBetweenAngles(degrees, getCurrentRealtiveHeadingToStart());
 
 
-  if (abs(headingError) < 2) {
+  if (fabs(headingError) < 2) {
      setMotorSpeed(BOTH_MOTORS,0);  // Halt motors
       return true;
   }
@@ -395,22 +428,24 @@ float readHeading() {
 #endif
 }
 
-int getCurrentRealtiveHeadingToStart(){
-  float difference = readHeading() - initialHeading;
-  return ((int)difference + 360) % 360;
+float getCurrentRealtiveHeadingToStart(){
+  float difference = fmod(readHeading() - initialHeading, 360.0);
+  if (difference < 0) difference += 360;
+  return difference;
 }
 
 /*
  * calculateDifferenceBetweenAngles
  * ---------------------------------
  * Return the difference between two angles in a 0-360 system
- * - returns +-179
+ * - returns (-180, 180]
  */
-int calculateDifferenceBetweenAngles(int angle1, int angle2) {
-   int delta;
+float calculateDifferenceBetweenAngles(float angle1, float angle2) {
+   float delta;
 
-    delta = (angle1 - angle2 + 360) % 360;
+    delta = fmod(angle1 - angle2, 360.0);
        if (delta > 180) delta = delta - 360;
+       else if (delta <= -180) delta = delta + 360;
 
      return delta;
 }
