@@ -191,6 +191,9 @@ void loop()
     // Serial.print("State: ");
     // Serial.println(state);
     lastTime = millis();
+    static uint8_t redLedState = LOW;
+    redLedState = !redLedState;   // Toggle each pass so the LED blinks at the loop rate
+    digitalWrite(RED_LED, redLedState);
   }
 
 #ifdef USE_MPU6050
