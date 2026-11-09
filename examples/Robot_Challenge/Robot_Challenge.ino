@@ -237,7 +237,7 @@ void loop()
       setMotorSpeed(LEFT_MOTOR, 0);
       setMotorSpeed(RIGHT_MOTOR, 0);
       crashedCount = getEncoderRightCnt();
-      state = TURN_GYRO;
+      state = TURN_SIMPLE;
     break;
 
     case DUMP:
